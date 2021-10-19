@@ -1,0 +1,6 @@
+[registries]
+default = "dsco-dev"
+dsco-cargo = { index = "https://dl.cloudsmith.io/basic/dsco/cargo/cargo/index.git" }
+
+[net]
+git-fetch-with-cli = true
