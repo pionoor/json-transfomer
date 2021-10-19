@@ -1,0 +1,49 @@
+{
+  "retailer": {
+    "id": "12342"
+  },
+
+  "order": {
+    "po_number": "573832",
+    "shipments": [
+      {
+        "tracking_number" : "1234567",
+        "items": [
+          {
+            "sku": "SKU-123",
+            "quantity": 4
+          },
+          {
+            "sku": "SKU-343",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "tracking_number" : "98776",
+        "items": [
+          {
+            "sku": "SKU-1453",
+            "quantity": 1
+          },
+          {
+            "sku": "SKU-543",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "user_id": 2331212,
+  "order_id": "34554543",
+  "product": {
+    "id": "654654",
+    "length": 50,
+    "alternative_size": 33,
+    "details" :{
+      "name": "Red Shoes",
+      "manufacture": "company"
+    }
+  },
+  "ids": ["34554543", "7643534", "512342"]
+}
