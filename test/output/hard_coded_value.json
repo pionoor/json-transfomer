@@ -1,8 +1,8 @@
-
+[
   {
-    "[order]": {
+    "order": {
       "sub_order": {
-        "...walmart_item_ids": "/ids",
+        "item_ids": "/ids",
         "account_id": "/retailer/id",
         "fulfillment_line_item_id": "/order/po_number",
         "details": {
@@ -10,11 +10,9 @@
           "quantity": "/order/shipments/items/quantity"
         },
         "product": {
-          "id": "/product/id"
+          "id": "'12345'"
         }
       }
     }
   }
-
-
-
+]

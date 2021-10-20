@@ -1,0 +1,50 @@
+image:
+  name: docker.cloudsmith.io/dsco/docker/dscopipe:12
+  username: $CLOUDSMITH_USER
+  password: $CLOUDSMITH_PASS
+
+pipelines:
+  default:
+    - step: &conformity
+        name: Run cargo clippy
+        caches:
+          - cargo
+          - rust-target
+        script:
+          - cargo clippy --all-targets --all-features -- -D warnings
+    - step: &test
+        name: Unit & Integration Tests
+        caches:
+          - cargo
+          - rust-target
+        script:
+          - cat /root/.cargo/config.toml
+          - cargo test --workspace --verbose
+        services:
+          - docker
+
+  branches:
+    dev-*:
+      - step:
+          <<: *conformity
+          name: Code conformity check
+      - step:
+          <<: *test
+          name: Unit & Integration Tests on Master
+    mkt-*:
+      - step:
+          <<: *conformity
+          name: Code conformity check
+      - step:
+          <<: *test
+          name: Unit & Integration Tests on Master
+
+      - step:
+          <<: *test
+          name: Unit & Integration Tests on Master
+
+definitions:
+  caches:
+    cargo: /usr/local/cargo # CARGO_HOME
+    rust-target: $BITBUCKET_CLONE_DIR/target
+    node-modules: $BITBUCKET_CLONE_DIR/node_modules
