@@ -3,7 +3,7 @@ mod transformer;
 use crate::transformer::{process_array_convertible_objs, traverse_mut};
 use anyhow::{anyhow, Result};
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::Value;
+use serde_json::{to_string_pretty, to_value, Value};
 
 /// Takes an input object and transform into an object that is the same structure as the passed output.
 /// The output object's field values must contains the mapping details from the input object.
@@ -305,8 +305,8 @@ where
     I: Serialize + DeserializeOwned,
     O: Serialize + DeserializeOwned,
 {
-    let mut output: Value = serde_json::to_value(output).unwrap();
-    let input: Value = serde_json::to_value(input).unwrap();
+    let mut output: Value = to_value(output).unwrap();
+    let input: Value = to_value(input).unwrap();
 
     let mut result: Vec<Value> = Vec::new();
 
@@ -315,7 +315,7 @@ where
         .ok_or_else(|| anyhow!("output should be in an array of object structure"))?
         .iter_mut()
     {
-        let string_pretty = serde_json::to_string_pretty(&obj)?;
+        let string_pretty = to_string_pretty(&obj)?;
         let _obj_name = obj
             .as_object()
             .ok_or_else(|| {
@@ -341,29 +341,28 @@ where
         result.push(obj.clone());
     }
 
-    Ok(serde_json::to_value(result)?)
+    Ok(to_value(result)?)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use once_cell::sync::Lazy;
-    use serde_json::{json, Value};
+    use serde_json::{from_str, json, Value};
     use std::fs;
     use std::sync::Mutex;
 
     const OUTPUT_JSON_FILES_DIR: &str = "./test/output";
     static INPUT_JSON_FILE: Lazy<Mutex<Value>> = Lazy::new(|| {
         let input = fs::read_to_string("./test/input.json").expect("Unable to read input file");
-        Mutex::new(serde_json::from_str(&input).expect("Unable to parse input json file to value"))
+        Mutex::new(from_str(&input).expect("Unable to parse input json file to value"))
     });
 
     #[test]
     fn transform_ok() {
         let output = fs::read_to_string(&format!("{}/default.json", OUTPUT_JSON_FILES_DIR))
             .expect("Unable to read file");
-        let output: Value =
-            serde_json::from_str(&output).expect("Unable to parse input json file to value");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
 
         let expected_transformed_output = fs::read_to_string(&format!(
             "{}/transformed/default.json",
@@ -373,8 +372,8 @@ mod tests {
             "Unable to read file {}/transformed/default.json",
             OUTPUT_JSON_FILES_DIR
         ));
-        let expected_transformed_output: Value = serde_json::from_str(&expected_transformed_output)
-            .expect(&format!(
+        let expected_transformed_output: Value =
+            from_str(&expected_transformed_output).expect(&format!(
                 "Unable to parse file {}/transformed/default.json",
                 OUTPUT_JSON_FILES_DIR
             ));
@@ -383,7 +382,7 @@ mod tests {
         let transformed_output = transform(&input, &output);
         // println!(
         //     "Output: {}",
-        //     serde_json::to_string_pretty(&transformed_output.unwrap()).unwrap()
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
         // );
         assert!(transformed_output.is_ok());
         assert_eq!(transformed_output.unwrap(), expected_transformed_output);
@@ -393,8 +392,7 @@ mod tests {
     fn transform_ok_object_to_array() {
         let output = fs::read_to_string(&format!("{}/array_obj.json", OUTPUT_JSON_FILES_DIR))
             .expect("Unable to read file");
-        let output: Value =
-            serde_json::from_str(&output).expect("Unable to parse input json file to value");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
 
         let expected_transformed_output = fs::read_to_string(&format!(
             "{}/transformed/array_obj.json",
@@ -404,8 +402,8 @@ mod tests {
             "Unable to read file {}/transformed/array_obj.json",
             OUTPUT_JSON_FILES_DIR
         ));
-        let expected_transformed_output: Value = serde_json::from_str(&expected_transformed_output)
-            .expect(&format!(
+        let expected_transformed_output: Value =
+            from_str(&expected_transformed_output).expect(&format!(
                 "Unable to parse file {}/transformed/array_obj.json",
                 OUTPUT_JSON_FILES_DIR
             ));
@@ -414,7 +412,7 @@ mod tests {
         let transformed_output = transform(&input, &output);
         // println!(
         //     "Output: {}",
-        //     serde_json::to_string_pretty(&transformed_output.unwrap()).unwrap()
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
         // );
         assert!(transformed_output.is_ok());
         assert_eq!(transformed_output.unwrap(), expected_transformed_output);
@@ -424,8 +422,7 @@ mod tests {
     fn transform_ok_object_to_array_2() {
         let output = fs::read_to_string(&format!("{}/array_obj_2.json", OUTPUT_JSON_FILES_DIR))
             .expect("Unable to read file");
-        let output: Value =
-            serde_json::from_str(&output).expect("Unable to parse input json file to value");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
 
         let expected_transformed_output = fs::read_to_string(&format!(
             "{}/transformed/array_obj_2.json",
@@ -435,8 +432,8 @@ mod tests {
             "Unable to read file {}/transformed/array_obj_2.json",
             OUTPUT_JSON_FILES_DIR
         ));
-        let expected_transformed_output: Value = serde_json::from_str(&expected_transformed_output)
-            .expect(&format!(
+        let expected_transformed_output: Value =
+            from_str(&expected_transformed_output).expect(&format!(
                 "Unable to parse file {}/transformed/array_obj_2.json",
                 OUTPUT_JSON_FILES_DIR
             ));
@@ -445,7 +442,7 @@ mod tests {
         let transformed_output = transform(&input, &output);
         // println!(
         //     "Output: {}",
-        //     serde_json::to_string_pretty(&transformed_output.unwrap()).unwrap()
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
         // );
         assert!(transformed_output.is_ok());
         assert_eq!(transformed_output.unwrap(), expected_transformed_output);
@@ -458,14 +455,13 @@ mod tests {
             OUTPUT_JSON_FILES_DIR
         ))
         .expect("Unable to read file");
-        let output: Value =
-            serde_json::from_str(&output).expect("Unable to parse input json file to value");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
 
         let input = INPUT_JSON_FILE.lock().unwrap().clone();
         let transformed_output = transform(&input, &output);
         // println!(
         //     "Output: {}",
-        //     serde_json::to_string_pretty(&transformed_output.unwrap()).unwrap()
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
         // );
         assert!(transformed_output.is_err());
         assert_eq!(
@@ -481,14 +477,13 @@ mod tests {
             OUTPUT_JSON_FILES_DIR
         ))
         .expect("Unable to read file");
-        let output: Value =
-            serde_json::from_str(&output).expect("Unable to parse input json file to value");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
 
         let input = INPUT_JSON_FILE.lock().unwrap().clone();
         let transformed_output = transform(&input, &output);
         // println!(
         //     "Output: {}",
-        //     serde_json::to_string_pretty(&transformed_output.unwrap()).unwrap()
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
         // );
         assert!(transformed_output.is_ok());
     }

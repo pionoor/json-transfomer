@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Result};
-use serde_json::Value;
+use serde_json::{to_string_pretty, to_value, Value};
 use std::collections::LinkedList;
 
 // cleans key string from `...` or `[]`, example `...items` -> `item, `[order]` ->  `order`
@@ -73,14 +73,9 @@ fn format_key(xpath: &str, key: &str) -> String {
 
 // Treats input which is type of serde Value as tree. It uses depth first search algorithm for traversal
 // It resolve the mapping value of each of the nodes and modifies it in place.
-pub fn traverse_mut(
-    input: &Value,
-    output: &mut serde_json::Value,
-    xpath: &str,
-    key: &str,
-) -> Result<()> {
+pub fn traverse_mut(input: &Value, output: &mut Value, xpath: &str, key: &str) -> Result<()> {
     match output {
-        serde_json::Value::Object(ref mut tree) => {
+        Value::Object(ref mut tree) => {
             for (sub_key, mut v) in tree.iter_mut() {
                 traverse_mut(input, &mut v, &format_key(xpath, key), sub_key)?;
             }
@@ -98,7 +93,7 @@ pub fn traverse_mut(
                 .to_owned();
             // check for hard coded values
             if output_field_value.starts_with('\'') && output_field_value.ends_with('\'') {
-                *output = serde_json::to_value(output_field_value.replace('\'', ""))?;
+                *output = to_value(output_field_value.replace('\'', ""))?;
                 return Ok(());
             }
             let mut path_tokens: LinkedList<&str> = output_field_value
@@ -134,7 +129,7 @@ pub fn resolve_output_field_value(
                 let value = element.get(&field_name).ok_or(anyhow!(
                     "Failed to resolve mapping value; couldn't find field name {} in the obj {}",
                     &field_name,
-                    serde_json::to_string_pretty(&element)?
+                    to_string_pretty(&element)?
                 ))?;
                 if value.is_array() {
                     result_array.extend(value.as_array().unwrap());
@@ -142,14 +137,14 @@ pub fn resolve_output_field_value(
                     result_array.push(value);
                 }
             }
-            resolve_output_field_value(path_tokens, &serde_json::to_value(result_array).unwrap())
+            resolve_output_field_value(path_tokens, &to_value(result_array).unwrap())
         }
         Value::Object(obj_value) => {
             return match obj_value.get(&field_name.to_owned()) {
                 None => bail!(
                     "Failed to resolve mapping value; couldn't find field name {} in the obj {}",
                     &field_name,
-                    serde_json::to_string_pretty(&obj_value)?
+                    to_string_pretty(&obj_value)?
                 ),
                 Some(field_value) => resolve_output_field_value(path_tokens, field_value),
             };
@@ -160,15 +155,15 @@ pub fn resolve_output_field_value(
 
 // it traverse the transformed output and convert objects into arrays wherever found.
 pub fn process_array_convertible_objs(
-    input: &serde_json::Value,
-    output: &mut serde_json::Value,
+    input: &Value,
+    output: &mut Value,
     xpath: &str,
     key: &str,
     visited: &mut LinkedList<String>,
     array_lens: &mut LinkedList<usize>,
 ) -> Result<()> {
     match input {
-        serde_json::Value::Object(ref tree) => {
+        Value::Object(ref tree) => {
             if is_obj_to_be_converted_to_array(key) {
                 visited.push_back(format_key(&clean_path(xpath)?, clean_key(key)?));
                 let parent_obj = if xpath.is_empty() {
@@ -286,7 +281,7 @@ pub fn split_obj_to_array(
         for (i, obj) in array_of_objs.iter_mut().enumerate() {
             let path = format_key(&path_to_spread_array, &i.to_string());
             let elem = output.pointer(&path).unwrap_or(&Value::Null).clone();
-            let pretty_print_obj = serde_json::to_string_pretty(&obj)?;
+            let pretty_print_obj = to_string_pretty(&obj)?;
             *obj.pointer_mut(array_path_from_parent_obj).ok_or_else(|| {
                 anyhow!(
                     "Failed to split object to array; could not find {} in {}",
@@ -299,7 +294,7 @@ pub fn split_obj_to_array(
         path_to_spread_array = visited.pop_back().unwrap();
     }
     *output.pointer_mut(path_to_array_parent_obj).unwrap() =
-        serde_json::to_value(array_of_objs.clone()).unwrap();
+        to_value(array_of_objs.clone()).unwrap();
     Ok(())
 }
 
