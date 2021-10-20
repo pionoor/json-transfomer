@@ -303,15 +303,13 @@ use serde_json::{to_string_pretty, to_value, Value};
 /// Any field in the output object can be have hard coded value instead of mapping value. To hard code
 /// a field value, simply use '', Example:
 /// ```json
-/// [
-///   {
-///         "product": {
-///           "id": "'123345'"
-///         }
-///       }
-///     }
-///   }
-/// ]
+///  [
+///    {
+///      "product": {
+///        "id": "'123345'"
+///      }
+///    }
+///  ]
 /// ```
 pub fn transform<I, O>(input: &I, output: &O) -> Result<Value>
 where
