@@ -1,9 +1,9 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Error, Result};
 use serde_json::{to_string_pretty, to_value, Value};
 use std::collections::LinkedList;
 
 // cleans key string from `...` or `[]`, example `...items` -> `item, `[order]` ->  `order`
-fn clean_key(key: &str) -> anyhow::Result<&str> {
+fn clean_key(key: &str) -> Result<&str> {
     let mut clean_key = key;
 
     if is_obj_to_be_converted_to_array(key) {
@@ -38,7 +38,7 @@ fn clean_path(path: &str) -> Result<String> {
             cleaned_key = clean_key(key)?
         }
 
-        Ok::<String, anyhow::Error>(format!("{}/{}", xpath, cleaned_key))
+        Ok::<String, Error>(format!("{}/{}", xpath, cleaned_key))
     })?;
     if result.is_empty() {
         result = clean_key(path)?.to_string();
@@ -137,7 +137,7 @@ pub fn resolve_output_field_value(
                     result_array.push(value);
                 }
             }
-            resolve_output_field_value(path_tokens, &to_value(result_array).unwrap())
+            resolve_output_field_value(path_tokens, &to_value(result_array)?)
         }
         Value::Object(obj_value) => {
             return match obj_value.get(&field_name.to_owned()) {
@@ -291,10 +291,14 @@ pub fn split_obj_to_array(
             })? = elem;
         }
 
-        path_to_spread_array = visited.pop_back().unwrap();
+        path_to_spread_array = visited.pop_back().ok_or_else(|| {
+            anyhow!("Failed to split object to array; failed to get path token from the stack")
+        })?;
     }
-    *output.pointer_mut(path_to_array_parent_obj).unwrap() =
-        to_value(array_of_objs.clone()).unwrap();
+    *output
+        .pointer_mut(path_to_array_parent_obj)
+        .ok_or_else(|| anyhow!("Failed to split object to array; failed to get parent object of the spread array from output"))? =
+        to_value(array_of_objs.clone())?;
     Ok(())
 }
 

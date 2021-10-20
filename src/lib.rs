@@ -9,7 +9,7 @@ use serde_json::{to_string_pretty, to_value, Value};
 /// The output object's field values must contains the mapping details from the input object.
 /// # Example
 /// ```
-/// use transformer::transform;
+///
 /// use serde_json::json;
 /// use transformer_rs::transform;
 /// fn main() {
@@ -83,7 +83,7 @@ use serde_json::{to_string_pretty, to_value, Value};
 ///         }
 ///     ]);
 ///
-///     let transformed_output = transform(&input, &output);
+///     let transformed_output = transform(&input, &output).unwrap();
 ///
 ///     println!(
 ///         "Output: {}",
@@ -299,7 +299,20 @@ use serde_json::{to_string_pretty, to_value, Value};
 ///   }
 /// ]
 /// ```
-///
+/// # Hard coded Values
+/// Any field in the output object can be have hard coded value instead of mapping value. To hard code
+/// a field value, simply use '', Example:
+/// ```json
+/// [
+///   {
+///         "product": {
+///           "id": "'123345'"
+///         }
+///       }
+///     }
+///   }
+/// ]
+/// ```
 pub fn transform<I, O>(input: &I, output: &O) -> Result<Value>
 where
     I: Serialize + DeserializeOwned,
@@ -375,6 +388,37 @@ mod tests {
         let expected_transformed_output: Value =
             from_str(&expected_transformed_output).expect(&format!(
                 "Unable to parse file {}/transformed/default.json",
+                OUTPUT_JSON_FILES_DIR
+            ));
+
+        let input = INPUT_JSON_FILE.lock().unwrap().clone();
+        let transformed_output = transform(&input, &output);
+        // println!(
+        //     "Output: {}",
+        //     to_string_pretty(&transformed_output.unwrap()).unwrap()
+        // );
+        assert!(transformed_output.is_ok());
+        assert_eq!(transformed_output.unwrap(), expected_transformed_output);
+    }
+
+    #[test]
+    fn transform_ok_hard_coded_value() {
+        let output =
+            fs::read_to_string(&format!("{}/hard_coded_value.json", OUTPUT_JSON_FILES_DIR))
+                .expect("Unable to read file");
+        let output: Value = from_str(&output).expect("Unable to parse input json file to value");
+
+        let expected_transformed_output = fs::read_to_string(&format!(
+            "{}/transformed/hard_coded_value.json",
+            OUTPUT_JSON_FILES_DIR
+        ))
+        .expect(&format!(
+            "Unable to read file {}/transformed/hard_coded_value.json",
+            OUTPUT_JSON_FILES_DIR
+        ));
+        let expected_transformed_output: Value =
+            from_str(&expected_transformed_output).expect(&format!(
+                "Unable to parse file {}/transformed/hard_coded_value.json",
                 OUTPUT_JSON_FILES_DIR
             ));
 
