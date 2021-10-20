@@ -371,25 +371,19 @@ mod tests {
         );
 
         // nested field
-        input_path_tokens.push_back("product");
-        input_path_tokens.push_back("details");
-        input_path_tokens.push_back("name");
+        input_path_tokens.extend(["product", "details", "name"]);
         let result = resolve_output_field_value(&mut input_path_tokens, &input);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), Value::from("Red Shoes"));
 
         // field in an array
-        input_path_tokens.push_back("order");
-        input_path_tokens.push_back("shipments");
-        input_path_tokens.push_back("tracking_number");
+        input_path_tokens.extend(["order", "shipments", "tracking_number"]);
         let result = resolve_output_field_value(&mut input_path_tokens, &input);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), Value::from(vec!["1234567", "98776"]));
 
         // field in an array of arrays
-        input_path_tokens.push_back("order");
-        input_path_tokens.push_back("shipments");
-        input_path_tokens.push_back("items");
+        input_path_tokens.extend(["order", "shipments", "items"]);
         let result = resolve_output_field_value(&mut input_path_tokens, &input);
         assert!(result.is_ok());
         assert_eq!(
@@ -415,10 +409,7 @@ mod tests {
         );
 
         // field in an array of arrays of objs
-        input_path_tokens.push_back("order");
-        input_path_tokens.push_back("shipments");
-        input_path_tokens.push_back("items");
-        input_path_tokens.push_back("sku");
+        input_path_tokens.extend(["order", "shipments", "items", "sku"]);
         let result = resolve_output_field_value(&mut input_path_tokens, &input);
         assert!(result.is_ok());
         assert_eq!(
@@ -447,9 +438,7 @@ mod tests {
         );
 
         // field in an array of objs
-        input_path_tokens.push_back("order");
-        input_path_tokens.push_back("shipments");
-        input_path_tokens.push_back("tracking_nomber");
+        input_path_tokens.extend(["order", "shipments", "tracking_nomber"]);
         let result = resolve_output_field_value(&mut input_path_tokens, &input);
         assert!(result.is_err());
         assert_eq!(
