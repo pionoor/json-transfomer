@@ -9,7 +9,6 @@ use serde_json::{to_string_pretty, to_value, Value};
 /// The output object's field values must contains the mapping details from the input object.
 /// # Example
 /// ```
-///
 /// use serde_json::json;
 /// use transformer_rs::transform;
 /// fn main() {

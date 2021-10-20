@@ -335,16 +335,16 @@ mod tests {
 
     #[test]
     fn test_is_obj_to_be_converted_to_array() {
-        assert_eq!(is_obj_to_be_converted_to_array("[obj]"), true);
-        assert_eq!(is_obj_to_be_converted_to_array("obj"), false);
-        assert_eq!(is_obj_to_be_converted_to_array("[obj"), false);
-        assert_eq!(is_obj_to_be_converted_to_array("obj]"), false);
+        assert!(is_obj_to_be_converted_to_array("[obj]"));
+        assert!(!is_obj_to_be_converted_to_array("obj"));
+        assert!(!is_obj_to_be_converted_to_array("[obj"));
+        assert!(!is_obj_to_be_converted_to_array("obj]"));
     }
 
     #[test]
     fn test_is_to_be_spread_array() {
-        assert_eq!(is_to_be_spread_array("...array"), true);
-        assert_eq!(is_to_be_spread_array("array"), false);
+        assert!(is_to_be_spread_array("...array"));
+        assert!(!is_to_be_spread_array("array"));
     }
 
     #[test]

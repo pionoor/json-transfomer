@@ -11,7 +11,7 @@ pipelines:
           - cargo
           - rust-target
         script:
-          - cargo clippy --all-targets --all-features -- -D warnings
+          - cargo clippy --all-targets --all-features
     - step: &test
         name: Unit & Integration Tests
         caches:
