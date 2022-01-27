@@ -1,11 +1,11 @@
-## Transformer-rs
+## JSON-transformer
  Takes an input object and transform into an object that is the same structure as the passed output.
  The output object's field values must contains the mapping details from the input object.
  ### Example
  ```rust
 
  use serde_json::json;
- use transformer_rs::transform;
+ use json_transformer::transform;
  fn main() {
  let input = json!({
          "retailer": {

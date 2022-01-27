@@ -10,7 +10,7 @@ use serde_json::{to_string_pretty, to_value, Value};
 /// # Example
 /// ```
 /// use serde_json::json;
-/// use transformer_rs::transform;
+/// use json_transformer::transform;
 /// fn main() {
 /// let input = json!({
 ///         "retailer": {
