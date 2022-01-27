@@ -1,4 +1,4 @@
-## Transformer-rs
+## JSON Transformer
  Takes an input object and transform into an object that is the same structure as the passed output.
  The output object's field values must contains the mapping details from the input object.
  ### Example
