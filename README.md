@@ -66,7 +66,7 @@
                "account_id": "/retailer/id",
                "fulfillment_line_item_id": "/order/po_number",
                "details": {
-                 ".trackings": "/order/shipments/tracking_number",
+                 "trackings": "/order/shipments/tracking_number",
                  "quantity": "/order/shipments/items/quantity"
                },
                "product": {
@@ -134,7 +134,7 @@
    {
      "[order]": {
        "sub_order": {
-         "...item_ids": "/ids",
+         "...item_id": "/ids",
          "account_id": "/retailer/id",
          "fulfillment_line_item_id": "/order/po_number",
          "details": {
